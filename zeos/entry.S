@@ -51,3 +51,27 @@
       movl %edx, %ds;           \
       movl %edx, %es
 
+#define RESTORE_ALL \
+	popl %ebx; \
+	popl %ecx; \
+	popl %edx; \
+	popl %esi; \
+	popl %edi; \
+	popl %ebp; \
+	popl %eax; \
+	popl %ds; \
+	popl %es; \
+	popl %fs; \
+	popl %gs
+
+#define EOI \
+	movb $0x20, %al; \
+	outb %al, $0x20
+	
+#define keyboard_handler \
+	call SAVE_ALL; \
+	call EOI; \
+	call keyboard_routine; \
+	movl %eax, 0x18(%esp); \
+	call RESTORE_ALL; \
+	iret
