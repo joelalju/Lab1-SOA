@@ -89,3 +89,17 @@ void setIdt()
   set_idt_reg(&idtR);
 }
 
+void keyboard_routine(void) {
+  unsigned char keyPressed;
+  keyPressed = inb(KEYBOARD_PORT);
+  if (!(keyPressed & MASK_KEY)) {
+    char key = char_map[keyPressed & 0x7F];
+    printc(key);
+    //printc_xy(0, 0, key);
+    //return 1; //todo ok
+  }
+  //TODO: codigo de error (errno.h)
+  //return -1;
+}
+
+
