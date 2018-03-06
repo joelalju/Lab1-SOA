@@ -42,6 +42,19 @@ int sys_fork()
   return PID;
 }
 
+int sys_write(int fd, char *buffer, int size) {
+	int checked = check_fd(fd, ESCRIPTURA);
+	if (checked < 0) return checked;
+	if (buffer == NULL) return -1;
+	if (size < 0) return -1;
+	
+	char *kernel;
+	copy_from_user(kernel,buffer, size);
+
+	int wconsole = sys_write_console (kernel, size);
+	return wconsole;
+}
+
 void sys_exit()
 {  
 }
