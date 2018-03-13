@@ -52,8 +52,14 @@ int sys_write(int fd, char *buffer, int size) {
 	copy_from_user(kernel,buffer, size);
 
 	int wconsole = sys_write_console (kernel, size);
+
 	return wconsole;
 }
+
+int sys_clock() {
+	return ;
+}
+
 
 void sys_exit()
 {  

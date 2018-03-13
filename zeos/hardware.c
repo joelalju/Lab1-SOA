@@ -103,7 +103,7 @@ __asm__ __volatile__(
   "call delay\n\t"
   "sti"
   : /*no output*/
-  : "i" (0xFD)       /* 0xFF = 11111111 -> all bits disabled, 0xFC = 11111100 -> timer & keyboard enabled */
+  : "i" (0xFC)       /* 0xFF = 11111111 -> all bits disabled, 0xFC = 11111100 -> timer & keyboard enabled */
   : "%al" );
 }
 

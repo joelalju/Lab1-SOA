@@ -29,6 +29,8 @@ char char_map[] =
   '\0','\0'
 };
 
+unsigned int zeos_ticks = 0;
+
 void setInterruptHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
 {
   /***********************************************************************/
@@ -84,11 +86,19 @@ void setIdt()
 
   /* ADD INITIALIZATION CODE FOR INTERRUPT VECTOR */
   setInterruptHandler(33, keyboard_handler, 0);
+  setInterruptHandler(32, clock_handler, 0);
   setTrapHandler(0x80, system_call_handler, 3);
   set_idt_reg(&idtR);
 }
 
+void init_zeos_ticks() {
+  zeos_ticks = 0;
+}
 
+void clock_routine(void) {
+  zeos_ticks++;
+  zeos_show_clock();
+}
 
 void keyboard_routine(void) {
   unsigned char keyPressed;

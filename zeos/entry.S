@@ -4,6 +4,7 @@
 
 #include <asm.h>
 #include <segment.h>
+#include <errno.h>
 
 
 /**************************************************/
@@ -72,7 +73,13 @@ ENTRY(keyboard_handler)
 	SAVE_ALL; 
 	EOI; 
 	call keyboard_routine; 
-	movl %eax, 0x18(%esp); 
+	RESTORE_ALL; 
+	iret;
+	
+ENTRY(clock_handler)
+	SAVE_ALL; 
+	EOI; 
+	call clock_routine;  
 	RESTORE_ALL; 
 	iret;
 

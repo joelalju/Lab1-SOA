@@ -24,4 +24,6 @@ void setIdt();
 
 void keyboard_routine();
 
+void init_zeos_ticks();
+
 #endif  /* __INTERRUPT_H__ */

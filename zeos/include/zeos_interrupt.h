@@ -24,4 +24,5 @@ void alignment_check_routine();
 void set_handlers();
 
 void keyboard_handler();
+void clock_handler();
 void system_call_handler();
