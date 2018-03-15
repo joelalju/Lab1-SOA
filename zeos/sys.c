@@ -48,12 +48,20 @@ int sys_fork()
 #define BUFFER_SIZE 512
 
 int sys_write(int fd, char *buffer, int size) {
+	//Error control
 	int checked = check_fd(fd, ESCRIPTURA);
-	if (checked < 0) return checked;
-	if (buffer == NULL) return -1;
-	if (size < 0) return -1;
-	
-	char kernelBuffer[512];
+	if (checked < 0) {
+		return checked;
+	}
+	if (buffer == NULL) {
+		return -1;
+	}
+	if (size < 0) {
+		return -1;
+	}
+
+	//Buffer print
+	char kernelBuffer[BUFFER_SIZE];
 	int bytesToPrint = size;
 	int bytesPrinted;
 	while (bytesToPrint > BUFFER_SIZE) {
@@ -62,6 +70,7 @@ int sys_write(int fd, char *buffer, int size) {
 		bytesToPrint -= bytesPrinted;
 		buffer += bytesPrinted;
 	}
+	//Print remaining bytes
 	if (bytesToPrint > 0) {
 		copy_from_user(buffer, kernelBuffer, bytesToPrint);
 		bytesPrinted = sys_write_console(kernelBuffer, bytesToPrint);
