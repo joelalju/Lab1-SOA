@@ -29,7 +29,7 @@ char char_map[] =
   '\0','\0'
 };
 
-unsigned int zeos_ticks = 0;
+extern zeos_ticks;
 
 void setInterruptHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
 {

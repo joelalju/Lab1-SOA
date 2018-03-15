@@ -23,11 +23,8 @@ finito:
 	ret;
 
 ENTRY(clock)
-	movl 0(%esp), %ebx;
-	movl 4(%esp), %ecx;
-	movl 8(%esp), %edx;
-	movl 12(%esp), %esi;
-	movl 16(%esp), %edi;
+	movl 0(%esp), %esi;
+	movl 4(%esp), %edi;
 	movl $10, %eax;
 	int $0x80;
 	cmpl $0, %eax;

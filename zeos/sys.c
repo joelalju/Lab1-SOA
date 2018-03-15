@@ -16,6 +16,8 @@
 #define LECTURA 0
 #define ESCRIPTURA 1
 
+extern zeos_ticks;
+
 int check_fd(int fd, int permissions)
 {
   if (fd!=1) return -9; /*EBADF*/
@@ -57,7 +59,7 @@ int sys_write(int fd, char *buffer, int size) {
 }
 
 int sys_clock() {
-	return ;
+	return zeos_ticks;
 }
 
 
