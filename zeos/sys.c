@@ -10,11 +10,14 @@
 #include <mm.h>
 
 #include <mm_address.h>
+#include <system.h>
 
 #include <sched.h>
 
 #define LECTURA 0
 #define ESCRIPTURA 1
+
+extern zeos_ticks;
 
 int check_fd(int fd, int permissions)
 {
@@ -67,8 +70,6 @@ int sys_write(int fd, char *buffer, int size) {
 
 	return (size - bytesToPrint);
 }
-
-extern int zeos_ticks;
 
 int sys_gettime() {
 	return zeos_ticks;

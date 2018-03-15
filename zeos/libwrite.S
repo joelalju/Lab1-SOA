@@ -7,31 +7,26 @@
 /**   8(%esp) - %edx     |                       **/
 
 ENTRY(write)
-	movl $1, %edx;
-	movl $2, %ecx;
-	movl $3, %ebx;
+	movl 4(%esp), %ebx;
+	movl 8(%esp), %ecx;
+	movl 12(%esp), %edx;
 	movl $4, %eax;
 	int $0x80;
 	cmpl $0, %eax;
-	jl err;
-	jmp finito;
-err:
+	jl errwrite;
+	jmp finwrite;
+errwrite:
 	movl $-ENOSYS, %eax;
-finito:
+finwrite:
 	ret;
 
-ENTRY(clock)
-	movl 0(%esp), %ebx;
-	movl 4(%esp), %ecx;
-	movl 8(%esp), %edx;
-	movl 12(%esp), %esi;
-	movl 16(%esp), %edi;
+ENTRY(gettime)
 	movl $10, %eax;
 	int $0x80;
 	cmpl $0, %eax;
-	jl err2;
-	jmp finito2;
-err2:
+	jl errtime;
+	jmp fintime;
+errtime:
 	movl $-ENOSYS, %eax;
-finito2:
+fintime:
 	ret;
