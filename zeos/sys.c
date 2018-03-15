@@ -42,24 +42,37 @@ int sys_fork()
   return PID;
 }
 
+#define BUFFER_SIZE 512
+
 int sys_write(int fd, char *buffer, int size) {
 	int checked = check_fd(fd, ESCRIPTURA);
 	if (checked < 0) return checked;
 	if (buffer == NULL) return -1;
 	if (size < 0) return -1;
 	
-	char *kernel;
-	copy_from_user(kernel,buffer, size);
+	char kernelBuffer[512];
+	int bytesToPrint = size;
+	int bytesPrinted;
+	while (bytesToPrint > BUFFER_SIZE) {
+		copy_from_user(buffer, kernelBuffer, BUFFER_SIZE);
+		bytesPrinted = sys_write_console(kernelBuffer, BUFFER_SIZE);
+		bytesToPrint -= bytesPrinted;
+		buffer += bytesPrinted;
+	}
+	if (bytesToPrint > 0) {
+		copy_from_user(buffer, kernelBuffer, bytesToPrint);
+		bytesPrinted = sys_write_console(kernelBuffer, bytesToPrint);
+		bytesToPrint -= bytesPrinted;
+	}
 
-	int wconsole = sys_write_console (kernel, size);
-
-	return wconsole;
+	return (size - bytesToPrint);
 }
 
-int sys_clock() {
-	return ;
-}
+extern int zeos_ticks;
 
+int sys_gettime() {
+	return zeos_ticks;
+}
 
 void sys_exit()
 {  
