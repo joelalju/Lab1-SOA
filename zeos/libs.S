@@ -16,7 +16,10 @@ ENTRY(write)
 	jl errwrite;
 	jmp finwrite;
 errwrite:
-	movl $-ENOSYS, %eax;
+	movl $0, %ecx;
+	subl %ecx, %eax;
+	movl %eax, errno;
+	movl $-1, %eax;
 finwrite:
 	ret;
 
@@ -27,6 +30,9 @@ ENTRY(gettime)
 	jl errtime;
 	jmp fintime;
 errtime:
-	movl $-ENOSYS, %eax;
+	movl $0, %ecx;
+	subl %ecx, %eax;
+	movl %eax, errno;
+	movl $-1, %eax;
 fintime:
 	ret;

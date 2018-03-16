@@ -32,13 +32,18 @@ int __attribute__ ((__section__(".text.main")))
 
 	int i = 0;
 	while(1) {
-		if (i%100000 == 0){
+		if (i%10000000 == 0){
 			//char text[] = "probando, probando, 1, 2 ,3, probando";
 			//write(1, text, sizeof(text));
 			char timeBuffer[512];
 			int time = gettime();
 			itoa(time, timeBuffer);
 			write(1, timeBuffer, strlen(timeBuffer));
+			perror();
+			write (1, "\n", 1);
+			perror();
+			write(56,"Soy un error",1);
+			perror();
 			
 		}
 		i++;

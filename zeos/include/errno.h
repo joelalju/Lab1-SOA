@@ -2,7 +2,8 @@
 #define _ASM_GENERIC_ERRNO_H
 
 #include <asm-generic/errno-base.h>
-
+#define EBADF     9  /* Bad File Number*/
+#define EACCESS     13  /*Permission Denied*/
 #define EDEADLK     35  /* Resource deadlock would occur */
 #define ENAMETOOLONG    36  /* File name too long */
 #define ENOLCK      37  /* No record locks available */

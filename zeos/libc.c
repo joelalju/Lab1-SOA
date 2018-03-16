@@ -3,10 +3,10 @@
  */
 
 #include <libc.h>
-
+#include <errno.h>
 #include <types.h>
 
-int errno;
+int errno = 0;
 
 void itoa(int a, char *b)
 {
@@ -41,5 +41,12 @@ int strlen(char *a)
   while (a[i]!=0) i++;
   
   return i;
+}
+
+void perror() {
+	if (errno == -1) write(1,"Error\n", 6);
+	if (errno == -EBADF) write(1,"Bad file number\n",17);
+	if (errno == -EACCESS) write(1,"Permission denied\n",19);
+	if (errno == -ENOSYS) write(1,"Function not implemented\n",26);
 }
 
