@@ -17,6 +17,7 @@ enum state_t { ST_RUN, ST_READY, ST_BLOCKED };
 struct task_struct {
   int PID;			/* Process ID. This MUST be the first field of the struct. */
   page_table_entry * dir_pages_baseAddr;
+  unsigned long esp_register;
   struct list_head list;
 };
 
@@ -33,6 +34,9 @@ extern struct task_struct *idle_task;
 #define KERNEL_ESP(t)       	(DWord) &(t)->stack[KERNEL_STACK_SIZE]
 
 #define INITIAL_ESP       	KERNEL_ESP(&task[1])
+
+void init_free_queue();
+void init_ready_queue();
 
 /* Inicialitza les dades del proces inicial */
 void init_task1(void);

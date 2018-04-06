@@ -88,12 +88,19 @@ int __attribute__((__section__(".text.main")))
 
   monoprocess_init_addr_space(); /* TO BE DELETED WHEN ADDED THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS */
 
+  //init free queue
+  init_free_queue();
+  //init ready queue
+  init_ready_queue();
+
   /* Initialize Scheduling */
   init_sched();
 
   /* Initialize idle task  data */
+  printk("Init idle task ...");
   init_idle();
   /* Initialize task 1 data */
+  printk("Init task1 task ...");
   init_task1();
 
   /* Move user code/data now (after the page table initialization) */

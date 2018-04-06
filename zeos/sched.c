@@ -23,7 +23,7 @@ struct task_struct *idle_task;
 
 //////
 
-#if 0x
+#if 1
 struct task_struct *list_head_to_task_struct(struct list_head *l)
 {
   return list_entry( l, struct task_struct, list);
@@ -67,31 +67,62 @@ void cpu_idle(void)
 	}
 }
 
-void init_idle (void)
-{
+void init_idle (void){
 
-	task_struct new_one = list_first(freequeue);
-	new_one.PID = 0;
-	allocate_DIR(new_one);
-	idle_task = new_one;
+	struct list_head *head_task = list_first(&freequeue);
+	list_del(head_task);
+
+	struct task_struct *task = list_head_to_task_struct(head_task);
+	task->PID = 0;
+	allocate_DIR(task);
+
+	//init execution context
+	union task_union *union_task = (union task_union*)task;
+	//push function address
+  	union_task->stack[KERNEL_STACK_SIZE-1] = (unsigned long)&cpu_idle; 
+  	//push ebp
+  	union_task->stack[KERNEL_STACK_SIZE-2] = 0; 
+  	//point to top of the idle task stack
+	union_task->task.esp_register = (unsigned long)&union_task->stack[KERNEL_STACK_SIZE-2];
+
+	idle_task = task;
 
 }
 
-void init_task1(void)
-{
+void init_task1(void){
+	struct list_head *head_task = list_first(&freequeue);
+	list_del(head_task);
+
+	struct task_struct *task = list_head_to_task_struct(head_task);
+	task->PID = 1;
+	allocate_DIR(task);
+	set_user_pages(task);
+
+	//init execution context
+	union task_union *union_task = (union task_union*)task;
+	tss.esp0 = (DWord)&union_task->stack[KERNEL_STACK_SIZE];
+	set_cr3(task->dir_pages_baseAddr);
+
+}
+
+void init_ready_queue(){
+	//init readyqueue
+	INIT_LIST_HEAD(&readyqueue);
+}
+
+void init_free_queue(){
+	//init freequeue
+	INIT_LIST_HEAD(&freequeue);
+	for(int i = 0; i < NR_TASKS; ++i) {
+		list_add_tail(&(task[i].task.list), &freequeue);
+	}
 }
 
 
 void init_sched(){
-	//freequeue
-	INIT_LIST_HEAD(freequeue);
-	for(int i = 0; i < len(task); ++i) {
-		list_add(freequeue, task[i].task);
-		task[i].list = freequeue;
-	}
-
-	//readyqueue
-	INIT_LIST_HEAD(readyqueue);
+	
+	
+	
 }
 
 struct task_struct* current()
@@ -106,7 +137,7 @@ struct task_struct* current()
 }
 
 void task_switch(union task_union*t) {
-	t.stack.push(tss.esi);
+	/*t.stack.push(tss.esi);
 	t.stack.push(tss.edi);
 	t.stack.push(tss.ebx);
 
@@ -114,7 +145,7 @@ void task_switch(union task_union*t) {
 
 	tss.ebx = t.stack.pop();
 	tss.edi = t.stack.pop();
-	tss.esi = t.stack.pop();
+	tss.esi = t.stack.pop();*/
 }
 
 void inner_task_switch (union task_union *t) {
