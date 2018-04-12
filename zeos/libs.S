@@ -36,3 +36,22 @@ errtime:
 	movl $-1, %eax;
 fintime:
 	ret;
+
+ENTRY(getpid)
+	movl $20, %eax;
+	int $0x80;
+	ret;
+
+ENTRY(fork)
+	movl $2, %eax;
+	int $0x80;
+	cmpl $0, %eax;
+	jl errtime;
+	jmp fintime;
+errtime:
+	movl $0, %ecx;
+	subl %ecx, %eax;
+	movl %eax, errno;
+	movl $-1, %eax;
+fintime:
+	ret;

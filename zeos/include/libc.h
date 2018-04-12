@@ -10,6 +10,7 @@
 
 int write(int fd, char *buffer, int size);
 int gettime();
+int getpid();
 
 void itoa(int a, char *b);
 

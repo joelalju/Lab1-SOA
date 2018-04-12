@@ -60,11 +60,14 @@ int allocate_DIR(struct task_struct *t)
 void cpu_idle(void)
 {
 	__asm__ __volatile__("sti": : :"memory");
-
 	while(1)
 	{
 	;
 	}
+}
+
+void force_task_switch() {
+	task_switch((union task_union*)idle_task);
 }
 
 void init_idle (void){
@@ -101,8 +104,10 @@ void init_task1(void){
 	//init execution context
 	union task_union *union_task = (union task_union*)task;
 	tss.esp0 = (DWord)&union_task->stack[KERNEL_STACK_SIZE];
-	set_cr3(task->dir_pages_baseAddr);
+	set_cr3(get_DIR(task));
 
+	//test
+	//task_switch(union_task);
 }
 
 void init_ready_queue(){
@@ -136,18 +141,17 @@ struct task_struct* current()
   return (struct task_struct*)(ret_value&0xfffff000);
 }
 
-void task_switch(union task_union*t) {
-	/*t.stack.push(tss.esi);
-	t.stack.push(tss.edi);
-	t.stack.push(tss.ebx);
-
-	inner_task_switch(t);
-
-	tss.ebx = t.stack.pop();
-	tss.edi = t.stack.pop();
-	tss.esi = t.stack.pop();*/
-}
-
-void inner_task_switch (union task_union *t) {
-
+void inner_task_switch (union task_union *new) {
+	//update tss to make it point to the new_task system stack
+	tss.esp0 = (DWord)&new->stack[KERNEL_STACK_SIZE];
+	//change user addres space updating the current page directory
+	set_cr3(get_DIR(&new->task));
+	//store the current EBP register in the PCB
+  	new->stack[KERNEL_STACK_SIZE-1] = tss.ebp; 
+  	//change the current system stack setting ESP register to point to the stored value in the new PCB
+	new->task.esp_register = (unsigned long)&new->stack[KERNEL_STACK_SIZE];
+	//restore the EBP register from the stack
+	tss.ebp = new->stack[KERNEL_STACK_SIZE-1];
+	//return to the routine that called this one using the instruction RET
+	return;
 }
