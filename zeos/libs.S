@@ -48,10 +48,10 @@ ENTRY(fork)
 	cmpl $0, %eax;
 	jl errtime;
 	jmp fintime;
-errtime:
+errfork:
 	movl $0, %ecx;
 	subl %ecx, %eax;
 	movl %eax, errno;
 	movl $-1, %eax;
-fintime:
+finfork:
 	ret;
