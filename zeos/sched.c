@@ -17,9 +17,6 @@ union task_union *task = &protected_tasks[1]; /* == union task_union task[NR_TAS
 
 //////
 
-struct list_head freequeue;
-struct list_head readyqueue;
-struct task_struct *idle_task;
 
 //////
 
@@ -106,8 +103,6 @@ void init_task1(void){
 	tss.esp0 = (DWord)&union_task->stack[KERNEL_STACK_SIZE];
 	set_cr3(get_DIR(task));
 
-	//test
-	//task_switch(union_task);
 }
 
 void init_ready_queue(){
@@ -143,11 +138,11 @@ struct task_struct* current()
 
 void inner_task_switch (union task_union *new) {
 	//update tss to make it point to the new_task system stack
-	tss.esp0 = (DWord)&new->stack[KERNEL_STACK_SIZE];
+	tss.esp0 = (DWord)&(new->stack[KERNEL_STACK_SIZE]);
 	//change user addres space updating the current page directory
 	set_cr3(get_DIR(&new->task));
 	//store the current EBP register in the PCB
-  	new->stack[KERNEL_STACK_SIZE-1] = tss.ebp; 
+  	new->stack[KERNEL_STACK_SIZE-1] = tss.ebp;
   	//change the current system stack setting ESP register to point to the stored value in the new PCB
 	new->task.esp_register = (unsigned long)&new->stack[KERNEL_STACK_SIZE];
 	//restore the EBP register from the stack

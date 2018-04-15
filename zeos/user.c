@@ -44,14 +44,13 @@ int __attribute__ ((__section__(".text.main")))
 			perror();
 			write(56,"Soy un error",1);
 			perror();*/
-			char textBuffer[] = "Process pid: ";
+			char textBuffer[] = "\nProcess pid: ";
 			write(1, textBuffer, strlen(textBuffer));
 
 			int pid = getpid();
 			char pidBuffer[512];
 			itoa(pid, pidBuffer);
 			write(1, pidBuffer, strlen(pidBuffer));
-			write (1, "\n", 1);
 
 		}
 		i++;

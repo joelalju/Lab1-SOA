@@ -30,6 +30,10 @@ extern union task_union protected_tasks[NR_TASKS+2];
 extern union task_union *task; /* Vector de tasques */
 extern struct task_struct *idle_task;
 
+struct list_head freequeue;
+struct list_head readyqueue;
+struct task_struct *idle_task;
+
 
 #define KERNEL_ESP(t)       	(DWord) &(t)->stack[KERNEL_STACK_SIZE]
 
@@ -46,6 +50,8 @@ void init_idle(void);
 void init_sched(void);
 
 struct task_struct * current();
+
+void force_task_switch();
 
 void task_switch(union task_union*t);
 

@@ -97,10 +97,10 @@ int __attribute__((__section__(".text.main")))
   init_sched();
 
   /* Initialize idle task  data */
-  printk("Init idle task ...");
+  printk("Init idle task ... ");
   init_idle();
   /* Initialize task 1 data */
-  printk("Init task1 task ...");
+  printk("Init task1 task ... ");
   init_task1();
 
   /* Move user code/data now (after the page table initialization) */
