@@ -90,6 +90,7 @@ void init_idle (void){
 }
 
 void init_task1(void){
+
 	struct list_head *head_task = list_first(&freequeue);
 	list_del(head_task);
 
@@ -137,16 +138,37 @@ struct task_struct* current()
 }
 
 void inner_task_switch (union task_union *new) {
+
+	printk("Inner task switch 1... ");
 	//update tss to make it point to the new_task system stack
-	tss.esp0 = (DWord)&(new->stack[KERNEL_STACK_SIZE]);
+	struct task_struct *task = &new->task;
+	tss.esp0 = KERNEL_ESP(new);
+
+		printk("Inner task switch 2... ");
+
 	//change user addres space updating the current page directory
-	set_cr3(get_DIR(&new->task));
+
+	set_cr3(get_DIR(&(new->task)));
+
+		printk("Inner task switch 3... ");
+
 	//store the current EBP register in the PCB
-  	new->stack[KERNEL_STACK_SIZE-1] = tss.ebp;
+	current()->esp_register = get_ebp();
+
+  		printk("Inner task switch 4... ");
+
   	//change the current system stack setting ESP register to point to the stored value in the new PCB
-	new->task.esp_register = (unsigned long)&new->stack[KERNEL_STACK_SIZE];
+	//new->task.esp_register = (unsigned long)&new->stack[KERNEL_STACK_SIZE];
+
 	//restore the EBP register from the stack
 	tss.ebp = new->stack[KERNEL_STACK_SIZE-1];
+
+		printk("Inner task switch 5... ");
+
+	change_context(new->task.esp_register);
+
+		printk("Inner task switch 6... ");
+
 	//return to the routine that called this one using the instruction RET
-	return;
+	//return;
 }
