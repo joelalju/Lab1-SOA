@@ -2,9 +2,10 @@
  * sched.c - initializes struct for task 0 anda task 1
  */
 
-#include <sched.h>
+#include <schedperf.h>
 #include <mm.h>
 #include <io.h>
+#include <system.h>
 
 /**
  * Container for the Task array and 2 additional pages (the first and the last one)
@@ -171,4 +172,23 @@ void inner_task_switch (union task_union *new) {
 
 	//return to the routine that called this one using the instruction RET
 	//return;
+}
+
+void update_sched_data_rr() {
+	++zeos_ticks;
+}
+
+int needs_sched_rr() {
+	if (zeos_ticks >= RR) return 1;
+	else return 0;
+}
+
+void update_process_state_rr (struct task_struct *t,struct list_head *dst_queue) {
+	if (t->PID != current()->PID ) list_del(&(t->list));
+	if (dst_queue != NULL) list_add_tail(&(t->list), dst_queue);
+}
+
+void sched_next_rr() {
+	current = list_first(readyqueue);
+	list_del(current);
 }
