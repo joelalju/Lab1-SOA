@@ -189,6 +189,7 @@ void update_process_state_rr (struct task_struct *t,struct list_head *dst_queue)
 }
 
 void sched_next_rr() {
-	current = list_first(readyqueue);
-	list_del(current);
+	struct list_head *next_process = list_first(&readyqueue);
+	list_del(next_process);
+  task_switch(next_process);
 }
