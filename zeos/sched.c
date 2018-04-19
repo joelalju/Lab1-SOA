@@ -18,6 +18,7 @@ union task_union *task = &protected_tasks[1]; /* == union task_union task[NR_TAS
 
 //////
 
+int quantum;
 
 //////
 
@@ -175,14 +176,17 @@ void inner_task_switch (union task_union *new) {
 }
 
 void update_sched_data_rr() {
-	++zeos_ticks;
+	int aux = get_quantum(current());
+  set_quantum(current(), aux-1);
 }
 
 int needs_sched_rr() {
-	if (zeos_ticks >= RR) return 1;
+	if (get_quantum(current()) <= 0) return 1;
 	else return 0;
 }
 
+
+//t is the current task, and dst_queue the new state of the current task
 void update_process_state_rr (struct task_struct *t,struct list_head *dst_queue) {
 	if (t->PID != current()->PID ) list_del(&(t->list));
 	if (dst_queue != NULL) list_add_tail(&(t->list), dst_queue);
@@ -192,4 +196,22 @@ void sched_next_rr() {
 	struct list_head *next_process = list_first(&readyqueue);
 	list_del(next_process);
   task_switch(next_process);
+}
+
+void schedule() {
+  update_sched_data_rr();
+  if (needs_sched_rr() && !list_empty(&readyqueue) && current()->PID != 0) {
+    set_quantum (current(), RR);
+    update_process_state_rr(current(), &readyqueue);
+    sched_next_rr();
+  }
+}
+
+int get_quantum (struct task_struct *t) {
+  return t->quantum;
+  
+}
+
+void set_quantum (struct task_struct *t, int new_quantum) {
+  t->quantum = new_quantum;
 }
