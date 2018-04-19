@@ -32,7 +32,7 @@ int sys_ni_syscall()
 }
 
 int sys_getpid()
-{	
+{
 	force_task_switch();
 	return current()->PID;
 }
@@ -61,10 +61,10 @@ int sys_fork()
 	allocate_DIR(child_task);
 
 	//search physical pages in wich to map logical pages for data+stack of child process
-	int pag; 
+	int pag;
 	int new_ph_pag;
 	page_table_entry *process_PT = get_PT(child_task);
-  	/* DATA */ 
+  	/* DATA */
 	for (pag = 0; pag < NUM_PAG_DATA; ++pag) {
 		new_ph_pag = alloc_frame();
 		if (new_ph_pag == -1) {
@@ -91,7 +91,7 @@ int sys_fork()
 
 
 
-  
+
   return PID;
 }
 
@@ -134,6 +134,15 @@ int sys_gettime() {
 	return zeos_ticks;
 }
 
-void sys_exit()
-{  
+void sys_exit() {
+  struct task_struct *task = current();
+  page_table_entry *process = get_PT(task);
+  for (int i=0; i<NUM_PAG_DATA; i++){
+    free_frame(get_frame(process, PAG_LOG_INIT_DATA+i));
+    del_ss_pag(process, PAG_LOG_INIT_DATA+i);
+  }
+
+  task->PID=-1;
+  list_add_tail(&task->list, &freequeue);
+  sched_next_rr();
 }

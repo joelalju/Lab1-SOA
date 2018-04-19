@@ -55,3 +55,8 @@ errfork:
 	movl $-1, %eax;
 finfork:
 	ret;
+
+ENTRY(exit)
+	movl $1, %eax;
+	int $0x80;
+	ret;
