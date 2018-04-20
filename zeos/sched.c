@@ -82,6 +82,10 @@ void init_idle (void){
 
 	struct task_struct *task = list_head_to_task_struct(head_task);
 	task->PID = 0;
+
+	task->quantum = 10;
+	default_stats(&task->stat_list);
+
 	allocate_DIR(task);
 
 	//init execution context
@@ -97,6 +101,17 @@ void init_idle (void){
 
 }
 
+void default_stats(struct stats *s)
+{
+	s->user_ticks = 0;
+	s->system_ticks = 0;
+	s->blocked_ticks = 0;
+	s->ready_ticks = 0;
+	s->elapsed_total_ticks = get_ticks();
+	s->total_trans = 0;
+	s->remaining_ticks = get_ticks();
+}
+
 void init_task1(void){
 
 	struct list_head *head_task = list_first(&freequeue);
@@ -104,6 +119,11 @@ void init_task1(void){
 
 	struct task_struct *task = list_head_to_task_struct(head_task);
 	task->PID = 1;
+	task->quantum = 10;
+	task->state = ST_RUN;
+
+	default_stats(%task->stat_list);
+
 	allocate_DIR(task);
 	set_user_pages(task);
 
@@ -177,10 +197,9 @@ void update_process_state_rr (struct task_struct *t,struct list_head *dst_queue)
 
 void sched_next_rr() {
 	struct list_head *next_process = list_first(&readyqueue);
-  struct task_struct *np_aux = (struct task_struct*)((int)next_process&0xfffff000);
-  //get_stats(np_aux->PID, &(np_aux->stat_list));
+  	struct task_struct *np_aux = (struct task_struct*)((int)next_process&0xfffff000);
 	list_del(next_process);
-  task_switch((union task_union*)next_process);
+  	task_switch((union task_union*)next_process);
 }
 
 void schedule() {
