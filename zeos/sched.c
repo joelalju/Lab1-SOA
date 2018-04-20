@@ -108,6 +108,7 @@ void default_stats(struct stats *s)
 	s->system_ticks = 0;
 	s->blocked_ticks = 0;
 	s->ready_ticks = 0;
+
 	s->elapsed_total_ticks = zeos_ticks;
 	s->total_trans = 0;
 	s->remaining_ticks = zeos_ticks;
