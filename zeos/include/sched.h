@@ -52,6 +52,8 @@ void init_idle(void);
 
 void init_sched(void);
 
+void default_stats(struct stats *s);
+
 struct task_struct * current();
 
 void force_task_switch();
