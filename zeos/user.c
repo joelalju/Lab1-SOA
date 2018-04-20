@@ -52,6 +52,13 @@ int __attribute__ ((__section__(".text.main")))
 			itoa(pid, pidBuffer);
 			write(1, pidBuffer, strlen(pidBuffer));
 
+			int forkPid = fork();
+			if (forkPid < 0) {
+				perror();
+			}else if (forkPid > 0) {
+				yield();
+			}
+
 		}
 		i++;
 	}

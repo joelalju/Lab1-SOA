@@ -17,7 +17,7 @@ enum state_t { ST_RUN, ST_READY, ST_BLOCKED };
 struct task_struct {
   int PID;			/* Process ID. This MUST be the first field of the struct. */
   page_table_entry * dir_pages_baseAddr;
-  unsigned long esp_register;
+  int esp_register;
   struct list_head list;
   int quantum;
 };
@@ -29,10 +29,9 @@ union task_union {
 
 extern union task_union protected_tasks[NR_TASKS+2];
 extern union task_union *task; /* Vector de tasques */
-extern struct task_struct *idle_task;
 
-struct list_head freequeue;
-struct list_head readyqueue;
+extern struct list_head freequeue;
+extern struct list_head readyqueue;
 struct task_struct *idle_task;
 
 
@@ -54,7 +53,9 @@ struct task_struct * current();
 
 void force_task_switch();
 
-void task_switch(union task_union*t);
+void change_context(int *save_sp, int new_sp);
+
+void task_switch(union task_union *t);
 
 void inner_task_switch (union task_union *t);
 

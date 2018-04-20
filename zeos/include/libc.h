@@ -20,6 +20,8 @@ int getpid();
 
 int fork();
 
+int yield();
+
 void exit();
 
 void perror();
