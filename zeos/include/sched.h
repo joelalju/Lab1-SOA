@@ -8,6 +8,7 @@
 #include <list.h>
 #include <types.h>
 #include <mm_address.h>
+#include <stats.h>
 
 #define NR_TASKS      10
 #define KERNEL_STACK_SIZE	1024
@@ -20,6 +21,7 @@ struct task_struct {
   unsigned long esp_register;
   struct list_head list;
   int quantum;
+  struct stats stat_list;
 };
 
 union task_union {

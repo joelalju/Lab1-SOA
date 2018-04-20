@@ -24,4 +24,9 @@ void exit();
 
 void perror();
 
+/*pid: process identifier whose statistics get_stats will get
+st: pointer to the user buffer to store the statistics*/
+int get_stats(int pid, struct stats *st);
+
+
 #endif  /* __LIBC_H__ */

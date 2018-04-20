@@ -60,3 +60,19 @@ ENTRY(exit)
 	movl $1, %eax;
 	int $0x80;
 	ret;
+
+ENTRY(get_stats)
+	movl 4(%esp), %ebx;
+	movl 8(%esp), %ecx;
+	movl $35, %eax;
+	int $0x80;
+	cmpl $0, %eax;
+	jl errstat;
+	jmp finstat;
+errstat:
+	movl $0, %ecx;
+	subl %ecx, %eax;
+	movl %eax, errno;
+	movl $-1, %eax;
+finstat:
+	ret;

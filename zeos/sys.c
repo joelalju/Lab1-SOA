@@ -135,14 +135,32 @@ int sys_gettime() {
 }
 
 void sys_exit() {
-  struct task_struct *task = current();
-  page_table_entry *process = get_PT(task);
+  struct task_struct *aux = current();
+  page_table_entry *process = get_PT(aux);
   for (int i=0; i<NUM_PAG_DATA; i++){
     free_frame(get_frame(process, PAG_LOG_INIT_DATA+i));
     del_ss_pag(process, PAG_LOG_INIT_DATA+i);
   }
 
-  task->PID=-1;
-  list_add_tail(&task->list, &freequeue);
+  aux->PID=-1;
+  list_add_tail(&aux->list, &freequeue);
   sched_next_rr();
+}
+
+int sys_get_stats(int pid, struct stats *st) {
+  if (pid < 0) return -1;
+  for (int i= 0; i < NR_TASKS; ++i) {
+    if (task[i].task.PID == pid) {
+       int aux_tick;
+       if(task[i].task.PID == current()->PID) aux_tick = task[i].task.stat_list.system_ticks;
+       else if(&task[i].task.list == &readyqueue) aux_tick = task[i].task.stat_list.ready_ticks;
+       else aux_tick = task[i].task.stat_list.user_ticks;
+
+       int current_ticks = get_ticks();       
+       aux_tick += current_ticks - task[i].task.stat_list.elapsed_total_ticks;
+       task[i].task.stat_list.elapsed_total_ticks = current_ticks;
+       return 0;
+    }
+  }
+  return -1;
 }
