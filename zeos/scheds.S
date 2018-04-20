@@ -3,7 +3,7 @@
 #include <errno.h>
 
 ENTRY(task_switch)
-	pushl %ebp;
+    pushl %ebp;
     movl %esp, %ebp;
     pushl %esi;
     pushl %edi;
@@ -13,25 +13,18 @@ ENTRY(task_switch)
     addl $4, %esp;
     popl %ebx;
     popl %edi;
-    popl %esi;   
+    popl %esi;
     popl %ebp;
     ret;
 
-	/**pushl %esi;**/
-	/**pushl %edi;**/
-	/**pushl %ebx;**/
-	/**movl 4(%esp), %ebx;**/
-	/**call inner_task_switch;**/
-	/**popl %ebx;**/
-	/**popl %edi;**/
-	/**popl %esi;**/
-	/**ret;**/
+ENTRY(change_context)
+    mov 4(%esp), %eax;
+    mov %ebp, (%eax);
+    mov 8(%esp), %esp;
+    popl %ebp;
+    ret;
+
 
 ENTRY(get_ebp)
 	movl %ebp, %eax;
 	ret;
-
-ENTRY(change_context)
-    movl 4(%esp), %esp;
-    popl %ebp;
-    ret;

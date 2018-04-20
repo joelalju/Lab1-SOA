@@ -20,6 +20,11 @@ union task_union *task = &protected_tasks[1]; /* == union task_union task[NR_TAS
 
 int quantum;
 
+// free task structs
+struct list_head freequeue;
+// ready queue
+struct list_head readyqueue;
+
 //////
 
 #if 1
@@ -65,8 +70,9 @@ void cpu_idle(void)
 	}
 }
 
-void force_task_switch() {
-	task_switch((union task_union*)idle_task);
+void force_task_switch(){
+  update_process_state_rr(current(), &readyqueue);
+  sched_next_rr();
 }
 
 void init_idle (void){
@@ -123,9 +129,8 @@ void init_free_queue(){
 
 
 void init_sched(){
-	
-	
-	
+	init_free_queue();
+	init_ready_queue();
 }
 
 struct task_struct* current()
@@ -141,43 +146,20 @@ struct task_struct* current()
 
 void inner_task_switch (union task_union *new) {
 
-	printk("Inner task switch 1... ");
-	//update tss to make it point to the new_task system stack
 	struct task_struct *task = &new->task;
-	tss.esp0 = KERNEL_ESP(new);
 
-		printk("Inner task switch 2... ");
+  	// pdate TSS to make it point to the new_task system stack 
+  	tss.esp0 = KERNEL_ESP(new);
 
-	//change user addres space updating the current page directory
+  	// TLB flush. change user addres space updating the current page directory
+    set_cr3(get_DIR(task));
 
-	set_cr3(get_DIR(&(new->task)));
-
-		printk("Inner task switch 3... ");
-
-	//store the current EBP register in the PCB
-	current()->esp_register = get_ebp();
-
-  		printk("Inner task switch 4... ");
-
-  	//change the current system stack setting ESP register to point to the stored value in the new PCB
-	//new->task.esp_register = (unsigned long)&new->stack[KERNEL_STACK_SIZE];
-
-	//restore the EBP register from the stack
-	tss.ebp = new->stack[KERNEL_STACK_SIZE-1];
-
-		printk("Inner task switch 5... ");
-
-	change_context(new->task.esp_register);
-
-		printk("Inner task switch 6... ");
-
-	//return to the routine that called this one using the instruction RET
-	//return;
+  	change_context(&current()->esp_register, task->esp_register);
 }
 
 void update_sched_data_rr() {
 	int aux = get_quantum(current());
-  set_quantum(current(), aux-1);
+  set_quantum(current(), aux-1);	
 }
 
 int needs_sched_rr() {
@@ -195,7 +177,7 @@ void update_process_state_rr (struct task_struct *t,struct list_head *dst_queue)
 void sched_next_rr() {
 	struct list_head *next_process = list_first(&readyqueue);
 	list_del(next_process);
-  task_switch(next_process);
+   	//task_switch(next_process);
 }
 
 void schedule() {

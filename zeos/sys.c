@@ -19,6 +19,8 @@
 #define LECTURA 0
 #define ESCRIPTURA 1
 
+void * get_ebp();
+
 int check_fd(int fd, int permissions)
 {
   if (fd!=1) return -9; /*EBADF*/
@@ -33,18 +35,19 @@ int sys_ni_syscall()
 
 int sys_getpid()
 {
-	force_task_switch();
 	return current()->PID;
 }
 
-extern struct list_head freequeue;
-extern struct list_head readyqueue;
+int global_PID=1000;
+
+int ret_from_fork()
+{
+  return 0;
+}
 
 int sys_fork()
 {
-  int PID=-1;
-
-  // creates the child process
+  	// creates the child process
   	//get a free task_struct
   	if (list_empty(&freequeue)) {
   		return -ENOMEM;
@@ -76,7 +79,7 @@ int sys_fork()
 			}
 			//set pcb as free
 			list_add_tail(head_child_task, &freequeue);
-			return -ENOMEM;
+			return -EAGAIN;
 		}
 		set_ss_pag(process_PT, PAG_LOG_INIT_DATA + pag, new_ph_pag);
 	}
@@ -89,10 +92,44 @@ int sys_fork()
 		set_ss_pag(process_PT, PAG_LOG_INIT_CODE + i, get_frame(parent_task_PT, PAG_LOG_INIT_CODE + i));
 	}
 
+	// Copy parent's DATA to child. We will use TOTAL_PAGES-1 as a temp logical page to map to
+	for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE; pag<NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA; pag++)
+	{
+		// map one child page to parent's address space.
+		set_ss_pag(parent_task_PT, pag+NUM_PAG_DATA, get_frame(process_PT, pag));
+		copy_data((void*)(pag<<12), (void*)((pag+NUM_PAG_DATA)<<12), PAGE_SIZE);
+		del_ss_pag(parent_task_PT, pag+NUM_PAG_DATA);
+	}
 
+	/* Deny access to the child's memory space */
+  	set_cr3(get_DIR(current()));
 
+  	child_union_task->task.PID = ++global_PID;
+  	//child_union_task->task.state=ST_READY;
 
-  return PID;
+	// frame pointer 
+  	int register_ebp;	
+	// map parent ebp to child stack 
+	register_ebp = (int) get_ebp();
+	register_ebp = (register_ebp - (int)current()) + (int)(child_union_task);
+
+	child_union_task->task.esp_register = register_ebp + sizeof(DWord);
+
+	DWord temp_ebp = *(DWord*)register_ebp;
+	/* prepare child stack for context switch */
+	child_union_task->task.esp_register -= sizeof(DWord);
+	*(DWord*)(child_union_task->task.esp_register) = (DWord)&ret_from_fork;
+	child_union_task->task.esp_register -= sizeof(DWord);
+	*(DWord*)(child_union_task->task.esp_register) = temp_ebp;
+
+	/* set stats to 0 */
+	//init_stats(&(child_union_task->task.p_stats));
+
+	/* Queue child process into readyqueue */
+	//child_union_task->task.state = ST_READY;
+	list_add_tail(&(child_union_task->task.list), &readyqueue);
+
+	return child_union_task->task.PID;
 }
 
 #define BUFFER_SIZE 512
@@ -128,6 +165,12 @@ int sys_write(int fd, char *buffer, int size) {
 	}
 
 	return (size - bytesToPrint);
+}
+
+int sys_yield()
+{
+  force_task_switch();
+  return 0;
 }
 
 int sys_gettime() {
