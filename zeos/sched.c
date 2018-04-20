@@ -170,20 +170,23 @@ int needs_sched_rr() {
 
 //t is the current task, and dst_queue the new state of the current task
 void update_process_state_rr (struct task_struct *t,struct list_head *dst_queue) {
+  get_stats(t->PID, &(t->stat_list));
 	if (t->PID != current()->PID ) list_del(&(t->list));
 	if (dst_queue != NULL) list_add_tail(&(t->list), dst_queue);
 }
 
 void sched_next_rr() {
 	struct list_head *next_process = list_first(&readyqueue);
+  struct task_struct *np_aux = (struct task_struct*)((int)next_process&0xfffff000);
+  get_stats(np_aux->PID, &(np_aux->stat_list));
 	list_del(next_process);
-   	//task_switch(next_process);
+  task_switch((union task_union*)next_process);
 }
 
 void schedule() {
   update_sched_data_rr();
   if (needs_sched_rr() && !list_empty(&readyqueue) && current()->PID != 0) {
-    set_quantum (current(), RR);
+    set_quantum (current(), 10);
     update_process_state_rr(current(), &readyqueue);
     sched_next_rr();
   }
