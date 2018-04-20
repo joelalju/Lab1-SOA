@@ -44,9 +44,27 @@ int strlen(char *a)
 }
 
 void perror() {
-	if (errno == -1) write(1,"Error\n", 6);
-	if (errno == -EBADF) write(1,"Bad file number\n",17);
-	if (errno == -EACCESS) write(1,"Permission denied\n",19);
-	if (errno == -ENOSYS) write(1,"Function not implemented\n",26);
+  switch(errno) {
+    char *textBuffer;
+    case -EBADF:
+      write(1,"Bad file number\n",17);
+      break;
+    case -EACCESS:
+      write(1,"Permission denied\n",19);
+      break;
+    case -ENOSYS:
+      write(1,"Function not implemented\n",26);
+      break;
+    case -EAGAIN:
+      textBuffer = "Error: Try again  \n";
+      write(1, textBuffer, strlen(textBuffer));
+      break;
+    case -ENOMEM:
+      textBuffer = "Error: Out of memory  \n";
+      write(1, textBuffer, strlen(textBuffer));
+      break;
+    default:
+      write(1,"Error\n", 6);
+  }
 }
 

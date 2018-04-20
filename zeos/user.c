@@ -57,8 +57,11 @@ int __attribute__ ((__section__(".text.main")))
 				perror();
 			}else if (forkPid > 0) {
 				yield();
+				char textBufferFork[] = "\nChild pid: ";
+				write(1, textBufferFork, strlen(textBufferFork));
+				itoa(forkPid, pidBuffer);
+				write(1, pidBuffer, strlen(pidBuffer));
 			}
-
 		}
 		i++;
 	}
