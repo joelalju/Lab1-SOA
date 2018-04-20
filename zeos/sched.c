@@ -38,25 +38,25 @@ extern struct list_head blocked;
 
 
 /* get_DIR - Returns the Page Directory address for task 't' */
-page_table_entry * get_DIR (struct task_struct *t) 
+page_table_entry * get_DIR (struct task_struct *t)
 {
 	return t->dir_pages_baseAddr;
 }
 
 /* get_PT - Returns the Page Table address for task 't' */
-page_table_entry * get_PT (struct task_struct *t) 
+page_table_entry * get_PT (struct task_struct *t)
 {
 	return (page_table_entry *)(((unsigned int)(t->dir_pages_baseAddr->bits.pbase_addr))<<12);
 }
 
 
-int allocate_DIR(struct task_struct *t) 
+int allocate_DIR(struct task_struct *t)
 {
 	int pos;
 
 	pos = ((int)t-(int)task)/sizeof(union task_union);
 
-	t->dir_pages_baseAddr = (page_table_entry*) &dir_pages[pos]; 
+	t->dir_pages_baseAddr = (page_table_entry*) &dir_pages[pos];
 
 	return 1;
 }
@@ -87,9 +87,9 @@ void init_idle (void){
 	//init execution context
 	union task_union *union_task = (union task_union*)task;
 	//push function address
-  	union_task->stack[KERNEL_STACK_SIZE-1] = (unsigned long)&cpu_idle; 
+  	union_task->stack[KERNEL_STACK_SIZE-1] = (unsigned long)&cpu_idle;
   	//push ebp
-  	union_task->stack[KERNEL_STACK_SIZE-2] = 0; 
+  	union_task->stack[KERNEL_STACK_SIZE-2] = 0;
   	//point to top of the idle task stack
 	union_task->task.esp_register = (unsigned long)&union_task->stack[KERNEL_STACK_SIZE-2];
 
@@ -136,7 +136,7 @@ void init_sched(){
 struct task_struct* current()
 {
   int ret_value;
-  
+
   __asm__ __volatile__(
   	"movl %%esp, %0"
 	: "=g" (ret_value)
@@ -148,7 +148,7 @@ void inner_task_switch (union task_union *new) {
 
 	struct task_struct *task = &new->task;
 
-  	// pdate TSS to make it point to the new_task system stack 
+  	// pdate TSS to make it point to the new_task system stack
   	tss.esp0 = KERNEL_ESP(new);
 
   	// TLB flush. change user addres space updating the current page directory
@@ -159,7 +159,7 @@ void inner_task_switch (union task_union *new) {
 
 void update_sched_data_rr() {
 	int aux = get_quantum(current());
-  set_quantum(current(), aux-1);	
+  set_quantum(current(), aux-1);
 }
 
 int needs_sched_rr() {
@@ -170,7 +170,7 @@ int needs_sched_rr() {
 
 //t is the current task, and dst_queue the new state of the current task
 void update_process_state_rr (struct task_struct *t,struct list_head *dst_queue) {
-  get_stats(t->PID, &(t->stat_list));
+  //get_stats(t->PID, &(t->stat_list));
 	if (t->PID != current()->PID ) list_del(&(t->list));
 	if (dst_queue != NULL) list_add_tail(&(t->list), dst_queue);
 }
@@ -178,7 +178,7 @@ void update_process_state_rr (struct task_struct *t,struct list_head *dst_queue)
 void sched_next_rr() {
 	struct list_head *next_process = list_first(&readyqueue);
   struct task_struct *np_aux = (struct task_struct*)((int)next_process&0xfffff000);
-  get_stats(np_aux->PID, &(np_aux->stat_list));
+  //get_stats(np_aux->PID, &(np_aux->stat_list));
 	list_del(next_process);
   task_switch((union task_union*)next_process);
 }
@@ -194,7 +194,7 @@ void schedule() {
 
 int get_quantum (struct task_struct *t) {
   return t->quantum;
-  
+
 }
 
 void set_quantum (struct task_struct *t, int new_quantum) {
